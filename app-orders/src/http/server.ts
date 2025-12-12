@@ -6,11 +6,14 @@ import {
   validatorCompiler,
   type ZodTypeProvider
 } from 'fastify-type-provider-zod'
+import { channel } from '../broker/channels/index.ts'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
+
+app.register(fastifyCors,{origin: '*'})
 
 
 app.get('/health',()=>{
@@ -20,13 +23,15 @@ app.get('/health',()=>{
 app.post('/orders',{
   schema: {
     body: z.object({
-      amount: z.number()
+      amount: z.coerce.number()
     })
   }
-},(request,reply )=>{
+},async(request,reply )=>{
   const {amount} =  request.body
 
   console.log('Creating an order with amount:', amount )
+
+  channel.orders.sendToQueue('orders', Buffer.from(JSON.stringify({amount})))
   
   return reply.status(201).send()
 })

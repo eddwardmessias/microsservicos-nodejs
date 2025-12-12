@@ -1,5 +1,5 @@
 import { orders } from "./orders.ts";
 
-export const schema = {
+export const channel = {
   orders,
 }
