@@ -8,6 +8,13 @@
       "when": 1765234910398,
       "tag": "0000_sloppy_dreaming_celestial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765564804912,
+      "tag": "0001_burly_phalanx",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,5 @@
 import {fastify} from 'fastify'
+import { randomUUID } from 'node:crypto'
 import {fastifyCors} from '@fastify/cors'
 import {z} from 'zod'
 import {
@@ -7,6 +8,8 @@ import {
   type ZodTypeProvider
 } from 'fastify-type-provider-zod'
 import { channel } from '../broker/channels/index.ts'
+import { schema } from '../db/schema/index.ts'
+import { db } from '../db/client.ts'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -32,7 +35,8 @@ app.post('/orders',{
   console.log('Creating an order with amount:', amount )
 
   channel.orders.sendToQueue('orders', Buffer.from(JSON.stringify({amount})))
-  
+
+
   return reply.status(201).send()
 })
 
