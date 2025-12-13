@@ -10,6 +10,8 @@ import {
 import { channel } from '../broker/channels/index.ts'
 import { schema } from '../db/schema/index.ts'
 import { db } from '../db/client.ts'
+import { ca } from 'zod/locales'
+import { dispatchOrderCreate } from '../broker/message/order-created.ts'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -29,15 +31,27 @@ app.post('/orders',{
       amount: z.coerce.number()
     })
   }
-},async(request,reply )=>{
+},async (request,reply)=>{
   const {amount} =  request.body
 
   console.log('Creating an order with amount:', amount )
 
-  channel.orders.sendToQueue('orders', Buffer.from(JSON.stringify({amount})))
+  dispatchOrderCreate({
+    orderId: randomUUID(),
+    amount,
+    customer: {
+      id: '4589eb72-a0e1-4d20-a958-7f5a71f03b4b'
+    }
+  })
 
+  await db.insert(schema.orders).values({
+    id: randomUUID(),
+    customerId: '4589eb72-a0e1-4d20-a958-7f5a71f03b4b',
+    amount,
+  })
 
   return reply.status(201).send()
+
 })
 
 app.listen({host: '0.0.0.0', port: 3003}).then(() => {
